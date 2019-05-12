@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -ex
 
 #將sercretFile從s3下載
 cd /home/ec2-user/deploy/code/
@@ -11,3 +11,5 @@ sudo tar -xvf mysql_data.tar
 sudo rm mysql_data.tar
 
 exit 0
+~
+
