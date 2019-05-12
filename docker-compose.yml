@@ -1,0 +1,32 @@
+version: '3'
+services:
+    container_name: 204065533127.dkr.ecr.ap-northeast-1.amazonaws.com/chatbot_db
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+  flask:
+    image: 204065533127.dkr.ecr.ap-northeast-1.amazonaws.com/chatbot_flask
+    container_name: chatbot_flask
+    tty: true
+    stdin_open: true
+    depends_on:
+      - db
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./code:/app/
+    command:
+      - app.py
+  serveo:
+    image: 204065533127.dkr.ecr.ap-northeast-1.amazonaws.com/chatbot_serveo
+    container_name: chatbot_serveo
+    tty: true
+    stdin_open: true
+    depends_on:
+      - flask
+    ports:
+      - "4040:4040"
+    command: autossh -M 0 -R dc10101.serveo.net:80:chatbot_flask:5000 -o StrictHostKeyChecking=no serveo.net

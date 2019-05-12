@@ -1,0 +1,41 @@
+#指定AppSpec file的版本目前只有0.0
+version: 0.0
+#使用的作業系統
+os: linux
+#更改目標的權限
+permissions:
+  - object: /home/ec2-user/
+    pattern: "**"
+    owner: ec2-user
+    group: ec2-user
+#設定將要部署的文件擺放位置，此階段為install
+files:
+  - source: /
+    destination: /home/ec2-user/deploy
+#開始運行腳本安裝，下面數字為執行順序
+hooks:
+#2.此階段為執行預安裝任務，像是將image拉下
+  BeforeInstall:
+    - location: scripts/BeforeInstall.sh
+      timeout: 3000
+      runas: ec2-user
+#3.此階段為執行配置應用程序或文件權限修改
+  AfterInstall:
+    - location: scripts/AfterInstall.sh
+      timeout: 3000
+      runas: ec2-user
+#4.此階段為啟動已部署的應用
+  ApplicationStart:
+    - location: scripts/ApplicationStart.sh
+      timeout: 3000
+      runas: ec2-user
+#1.此階段第一次不執行，再次部署時值執行，負責前次部屬環境清理
+  ApplicationStop:
+    - location: scripts/ApplicationStop.sh
+      timeout: 3600
+      runas: ec2-user
+#5.此階段為驗證服務是否啟動
+  ValidateService:
+    - location: scripts/ValidateService.sh
+      timeout: 3600
+      runas: ec2-user

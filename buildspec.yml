@@ -1,0 +1,48 @@
+#構建規範版本
+version: 0.2
+#構建的各個階段將運行的命令
+phases:
+#構建之前將運行的命令
+  pre_build:
+    commands:
+    - echo Logging in to Amazon ECR...
+#登入ECR
+    - $(aws ecr get-login --no-include-email --registry-ids 204065533127 --region ap-northeast-1)
+#將本次專案ECR路徑儲存在變數URI
+    - URI=204065533127.dkr.ecr.ap-northeast-1.amazonaws.com
+#獲取關於commit id的環境變數
+    - VER=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+#將環境變數(commit id)當作tag
+    - TAG=${VER:=latest}
+  #生成過程中將運行的命令
+  build:
+    commands:
+    - echo Build started on date
+    - echo Building the Docker image...
+#先將git初始化
+    - git submodule init
+    - git submodule update
+#將專案所的images由dockerfile建立起來
+    - docker build -t $URI/chatbot_db:latest -f ./dockerfile/dockerfile-mariadb ./dockerfile/
+    - docker build -t $URI/chatbot_flask:latest -f ./dockerfile/dockerfile-flask ./dockerfile/
+    - docker build -t $URI/chatbot_serveo:latest -f ./dockerfile/dockerfile-serveo ./dockerfile/
+#將build打上tag
+    - docker tag $URI/chatbot_db:latest $URI/chatbot_db:$TAG
+    - docker tag $URI/chatbot_flask:latest $URI/chatbot_flask:$TAG
+    - docker tag $URI/chatbot_serveo:latest $URI/chatbot_serveo:$TAG
+#在生成後將運行的命令
+  post_build:
+    commands:
+    - echo Build completed on date
+    - echo Pushing the Docker image...
+#將建置好的images隨著tag推上ECR
+    - docker push $URI/chatbot_db:latest
+    - docker push $URI/chatbot_flask:latest
+    - docker push $URI/chatbot_serveo:latest
+    - docker push $URI/chatbot_db:$TAG
+    - docker push $URI/chatbot_flask:$TAG
+    - docker push $URI/chatbot_serveo:$TAG
+#pipline所需的artifacts輸出
+artifacts:
+  files:
+    - '**/*'
