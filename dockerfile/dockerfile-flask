@@ -15,6 +15,6 @@ RUN pip install Flask==1.0.2 requests line-bot-sdk PyMYSQL
 #RUN /bin/bash -c 'python test_flask.py'
 
 # run flask
-ENTRYPOINT ["python"]
-#CMD ["app.py"]
+#ENTRYPOINT ["python"]
+CMD ["python app.py"]
 
