@@ -19,7 +19,7 @@ services:
     volumes:
       - ./code:/app/
     command:
-      - app/app.py
+      - python app/app.py
   serveo:
     image: 204065533127.dkr.ecr.ap-northeast-1.amazonaws.com/chatbot_serveo
     container_name: chatbot_serveo
